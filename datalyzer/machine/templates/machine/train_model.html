@@ -1,0 +1,17 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Train!</button>
+    </form>
+
+    {% if is_saved %}
+        Your model is saved!
+    {% endif %}
+
+{% endblock %}
+
