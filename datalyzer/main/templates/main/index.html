@@ -1,10 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-This is a new web application!
-</body>
-</html>
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <div>
+        <h2>About the project</h2>
+        This is a web-based application that allows you to upload your data, define different machine learning methods, train them with the data and finally use
+        the trained model for predication tasks <b>ONLINE!</b>
+        The backend is written in <b>Django 2.2 </b>, which utilizes high quality tools to store and analyze data. Various machine learning
+    algorithms have been implemented to perform classification, clustering and dimension reduction tasks on the data using python packages
+    like <b>scikit-learn, pandas and numpy</b>. For test purposes sqlite is used as the database but postgreSql is preferred for practical usage.
+
+    </div>
+
+    <h2>Instructions</h2>
+    <ul>
+    <li>Before starting, you need to sign in to be able to use the application. So, in case you are not logged in, links are provided at the menu
+        to sign up or log in. </li>
+    <li>First, upload your data by clicking on <a href="{% url 'machine:upload_data' %}">Upload data</a>. Then you should configure a machine.
+It is really easy. Just go to <a href="{% url 'machine:select_method' %}">Select & config method</a> and select a method, followed by a page in which
+        you can choose custom parameters for that specific method. Now, it is time to train the defined machine by the data you uploaded before. Click on
+    <a href="{% url 'machine:model_data' %}">Train the model</a> and choose the data and machine. Finally, you can use the trained machine on a new data
+        for prediction tasks.
+    </li>
+    </ul>
+{% endblock %}

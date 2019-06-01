@@ -9,17 +9,25 @@
 
 
 <h1>A web application to analyze your data online!</h1>
-
+<h3>Developed by Milad Shiri.</h3>
+<h4>It's just a demo and yes we know that there is a lot of bugs!</h4>
 
 <div>
     <ul>
-    <li><a href="{% url 'userprofile:signin' %}">SignIn</a></li>
-    <li><a href="{% url 'userprofile:signup' %}">SingUp</a></li>
-
+        {% if not request.user.is_authenticated %}
+            <li><a href="{% url 'userprofile:signin' %}">LogIn</a></li>
+            <li><a href="{% url 'userprofile:signup' %}">SingUp</a></li>
+        {% else %}
+            <li><a href="">Hello {{ request.user.username }},</a></li>
+        {% endif %}
     <li><a href="{% url 'machine:upload_data' %}">Upload data</a></li>
     <li><a href="{% url 'machine:select_method' %}">Select & config method</a></li>
     <li><a href="{% url 'machine:model_data' %}">Train the model</a></li>
     <li><a href="{% url 'machine:predict_data' %}">Predict the data</a></li>
+
+     {% if request.user.is_authenticated %}
+         <li><a href="">LogOut</a></li>
+     {% endif %}
 
     </ul>
 </div>
