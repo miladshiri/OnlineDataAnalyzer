@@ -26,7 +26,7 @@
     <li><a href="{% url 'machine:predict_data' %}">Predict the data</a></li>
 
      {% if request.user.is_authenticated %}
-         <li><a href="">LogOut</a></li>
+         <li><a href="{% url 'userprofile:signout' %}">LogOut</a></li>
      {% endif %}
 
     </ul>
