@@ -1,15 +1,21 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from .forms import UploadFileForm, TrainModelForm, SelectModelForm, FitModelForm, \
-    machine_config_form_factory, MachineCreateForm
-from pandas import read_csv, DataFrame, read_excel, Series
-from .models import Data
-from django.forms import modelform_factory
+from .forms import UploadFileForm, TrainModelForm, SelectModelForm, \
+    machine_config_form_factory, MachineCreateForm, PredictDataForm
+import pandas as pd
+from .models import Data, Train, Machine
 from django.urls import reverse
 from urllib.parse import urlencode
-from django.forms.models import model_to_dict
+from .utils import datamining
+from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView, DetailView, DeleteView
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 
+
+@login_required
 def upload_data(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -19,13 +25,13 @@ def upload_data(request):
             file_format = data_file.name.split('.')[-1]
 
             if file_format in ['txt', 'csv']:
-                data_df = read_csv(data_file, sep=',', header=None)
+                data_df = pd.read_csv(data_file, sep=',', header=None)
             elif file_format in ['xls', 'xlsx']:
-                data_df = read_excel(data_file, header=None)
+                data_df = pd.read_excel(data_file, header=None)
             else:
-                data_df = DataFrame([])
+                data_df = pd.DataFrame([])
 
-            features = Series(data_df.columns)
+            features = pd.Series(data_df.columns)
             if form.cleaned_data['column_title_first_row']:
                 features = data_df.iloc[0, :]
                 data_df = data_df.drop(data_df.index[0])
@@ -45,6 +51,7 @@ def upload_data(request):
     return render(request, 'machine/upload_page.html', {'form' : form})
 
 
+@login_required
 def select_method(request):
     if request.method == 'POST':
         form = SelectModelForm(request.POST)
@@ -58,6 +65,7 @@ def select_method(request):
     return render(request, 'machine/select_method.html', {'form': form})
 
 
+@login_required
 def config_machine(request):
     method_name = request.GET.get('method')
     if request.method == 'POST':
@@ -76,6 +84,7 @@ def config_machine(request):
     return render(request, 'machine/config_machine.html', {'form': form()})
 
 
+@login_required
 def model_data(request):
     if request.method == 'POST':
         form = TrainModelForm(request.user, request.POST)
@@ -83,7 +92,61 @@ def model_data(request):
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
-        return render(request, 'machine/train_model.html', {'form': form})
+
+            datamining.train_the_model(obj)
+
+        return render(request, 'machine/train_model.html', {'form': form, 'is_processing': True})
     else:
         form = TrainModelForm(request.user)
     return render(request, 'machine/train_model.html', {'form': form})
+
+
+@login_required
+def predict_data(request):
+    if request.method == 'POST':
+        form = PredictDataForm(request.user, request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
+            datamining.predict_data(obj)
+
+            return render(request, 'machine/results.html', {'accuracy_score': obj.accuracy()*100})
+
+    else:
+        form = PredictDataForm(request.user)
+    return render(request, 'machine/predict_data.html', {'form': form})
+
+
+class DataList(ListView):
+
+    context_object_name = 'data_list'
+    template_name = 'machine/data_list.html'
+
+    def get_queryset(self):
+        return Data.objects.filter(user=self.request.user)
+
+
+class DataDetail(PermissionRequiredMixin, DetailView):
+
+    context_object_name = 'data'
+    model = Data
+    template_name = 'machine/data_detail.html'
+
+    def has_permission(self):
+        obj = get_object_or_404(Data, pk=self.kwargs['pk'])
+
+        return obj.user == self.request.user
+
+
+class DataDelete(PermissionRequiredMixin, DeleteView):
+
+    model = Data
+    template_name = 'machine/data_delete.html'
+    success_url = reverse_lazy('machine:data_list')
+
+    def has_permission(self):
+        obj = get_object_or_404(Data, pk=self.kwargs['pk'])
+
+        return obj.user == self.request.user
+

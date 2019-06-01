@@ -1,25 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
-
-APPROACH_CHOICES = [
-    ('classification', 'Classification'),
-    ('clustering', 'Clustering'),
-    ('dimension_reduction', 'Dimension Reduction')
-]
-
-SVC = 'SVC'
-KNN = 'KNN'
-
-METHOD_CHOICES = [
-    (SVC, 'SVM - Classification'),
-    (KNN, 'KNN - Classification')
-]
-
-METHOD_PARAMS = {
-    SVC: ['kernel'],
-    KNN: ['neighbors']
-}
+from .utils import datamining
+from django.conf import settings
 
 
 class MachineBase(models.Model):
@@ -43,13 +26,38 @@ class Data(MachineBase):
 
 class Machine(MachineBase):
 
-    KERNEL_CHOICES = [
-        ('linear', 'Linear'),
-        ('rbf', 'RBF'),
-        ('poly', 'Polynomial')]
+    # CLASSIFICATION = 'classification'
+    # CLUSTERING = 'clustering'
+    #
+    # SVC = 'SVC'
+    # KNN = 'KNN'
+    #
+    # # METHOD_CHOICES = [
+    # #     (SVC, 'SVM - Classification'),
+    # #     (KNN, 'KNN - Classification')
+    # # ]
+    # #
+    # # METHOD_PARAMS = {
+    # #     SVC: ['kernel'],
+    # #     KNN: ['neighbors']
+    # # }
+    #
+    # METHODS = {
+    #     SVC: {'PARAMS': ['kernel'], 'CATEGORY': 'classification'},
+    #     KNN: {'PARAMS': ['neighbors'], 'CATEGORY': 'classification'},
+    # }
+    #
+    # METHOD_CHOICES = []
+    # for method in METHODS:
+    #     METHOD_CHOICES.append((method, method + ' - ' + METHODS[method]['CATEGORY']))
+    #
+    # KERNEL_CHOICES = [
+    #     ('linear', 'Linear'),
+    #     ('rbf', 'RBF'),
+    #     ('poly', 'Polynomial')]
 
-    method = models.CharField(max_length=50, choices=METHOD_CHOICES)
-    kernel = models.CharField(max_length=50, choices=KERNEL_CHOICES, null=True, blank=True)
+    method = models.CharField(max_length=50, choices=settings.METHOD_CHOICES)
+    kernel = models.CharField(max_length=50, choices=settings.KERNEL_CHOICES, null=True, blank=True)
     neighbors = models.IntegerField(default=5, null=True, blank=True)
     clusters = models.IntegerField(default=2, null=True, blank=True)
 
@@ -60,5 +68,16 @@ class Train(MachineBase):
     label = models.IntegerField()
     is_trained = models.BooleanField(default=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
-    trained_model = models.TextField(null=True, blank=True)
+    trained_model = models.FileField(upload_to='trained_models/', null=True, blank=True)
 
+
+class Predict(MachineBase):
+    data = models.ForeignKey(Data, on_delete=models.CASCADE)
+    has_label = models.BooleanField(default=True)
+    label = models.IntegerField()
+    train = models.ForeignKey(Train, on_delete=models.CASCADE)
+    predictions = models.TextField(null=True, blank=True)
+
+    def accuracy(self):
+
+        return datamining.model_accuracy(self)

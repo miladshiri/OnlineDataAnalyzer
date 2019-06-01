@@ -104,6 +104,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+LOGIN_URL = '/user/signin/'
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -125,3 +127,38 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Machine Learning Configuration
+
+CLASSIFICATION = 'classification'
+CLUSTERING = 'clustering'
+
+SVC = 'SVC'
+KNN = 'KNN'
+
+# METHOD_CHOICES = [
+#     (SVC, 'SVM - Classification'),
+#     (KNN, 'KNN - Classification')
+# ]
+#
+# METHOD_PARAMS = {
+#     SVC: ['kernel'],
+#     KNN: ['neighbors']
+# }
+
+METHODS = {
+    SVC: {'PARAMS': ['kernel'], 'CATEGORY': 'classification'},
+    KNN: {'PARAMS': ['neighbors'], 'CATEGORY': 'classification'},
+}
+
+METHOD_CHOICES = []
+for method in METHODS:
+    METHOD_CHOICES.append((method, method + ' - ' + METHODS[method]['CATEGORY']))
+
+KERNEL_CHOICES = [
+    ('linear', 'Linear'),
+    ('rbf', 'RBF'),
+    ('poly', 'Polynomial')]
+
+

@@ -1,0 +1,17 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% for data in data_list %}
+
+   <h3> {{ data.name }} </h3>
+    <h4> {{ data.description }}</h4>
+    <a href="{% url 'machine:detail_data' data.id %}">Detail...</a>
+
+    <a href="{% url 'machine:delete_data' data.id %}">Delete</a>
+    <br>
+
+
+{% endfor %}
+{% endblock %}

@@ -1,5 +1,6 @@
 from django import forms
-from .models import Data, METHOD_CHOICES, Machine, METHOD_PARAMS, Train
+from .models import Data, Machine, Train, Predict
+from django.conf import settings
 
 
 class UploadFileForm(forms.Form):
@@ -27,7 +28,7 @@ class DataModelChoiceField(forms.ModelChoiceField):
 
 
 class SelectModelForm(forms.Form):
-    method = forms.ChoiceField(choices=METHOD_CHOICES)
+    method = forms.ChoiceField(choices=settings.METHOD_CHOICES)
 
 
 def machine_config_form_factory(method_name):
@@ -36,7 +37,7 @@ def machine_config_form_factory(method_name):
     class MachineConfigForm(forms.ModelForm):
         class Meta:
             model = Machine
-            fields = base_fields + METHOD_PARAMS[method_name]
+            fields = base_fields + settings.METHODS[method_name]['PARAMS']
 
     return MachineConfigForm
 
@@ -61,10 +62,13 @@ class TrainModelForm(forms.ModelForm):
         self.fields['machine'].queryset = Machine.objects.filter(user=user)
 
 
-class FitModelForm(forms.ModelForm):
+class PredictDataForm(forms.ModelForm):
 
     class Meta:
-        model = Machine
-        exclude = ['name']
+        model = Predict
+        exclude = ['user', 'predictions']
 
-
+    def __init__(self, user, *args, **kwargs):
+        super(PredictDataForm, self).__init__(*args, **kwargs)
+        self.fields['data'].queryset = Data.objects.filter(user=user)
+        self.fields['train'].queryset = Train.objects.filter(user=user)

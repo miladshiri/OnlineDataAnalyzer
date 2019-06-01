@@ -6,12 +6,30 @@
 </head>
 <body>
 
+
+
 <h1>A web application to analyze your data online!</h1>
+
+
+<div>
+    <ul>
+    <li><a href="{% url 'userprofile:signin' %}">SignIn</a></li>
+    <li><a href="{% url 'userprofile:signup' %}">SingUp</a></li>
+
+    <li><a href="{% url 'machine:upload_data' %}">Upload data</a></li>
+    <li><a href="{% url 'machine:select_method' %}">Select & config method</a></li>
+    <li><a href="{% url 'machine:model_data' %}">Train the model</a></li>
+    <li><a href="{% url 'machine:predict_data' %}">Predict the data</a></li>
+
+    </ul>
+</div>
+
 
 
 {% block content %}
 
 {% endblock %}
+
 
 </body>
 </html>

@@ -3,6 +3,11 @@
 {% load static %}
 
 {% block content %}
+
+    {% if is_processing %}
+        <h2>The machine is processing...</h2>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
