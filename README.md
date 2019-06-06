@@ -1,5 +1,5 @@
 # OnlineDataAnalyzer
-###About the project
+## About the project
 
 This is a web-based application that allows you to upload your data, define different machine learning methods, train them with the data and finally use
 the trained model for predication tasks. 
@@ -8,7 +8,7 @@ The backend is written in Django 2.2, which utilizes high quality tools to store
  like scikit-learn, pandas and numpy. For test purposes sqlite is used as the database but postgreSql is preferred for practical usage.
 
 
-###Instructions
+## Instructions
 
 Before starting, you need to sign in to be able to use the application. So, in case you are not logged in, links are provided at the menu
  to sign up or log in.
